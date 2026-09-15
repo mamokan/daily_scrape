@@ -1,0 +1,22 @@
+# Requirements for daily_scrape project
+# Generated 2026-09-15 - Python 3.11
+#
+# === sqlite.py (sqlite.py:1-4) ===
+# All dependencies are Python standard library - no pip install needed:
+# - sqlite3  (sqlite.py:1) - stdlib, built-in
+# - csv      (sqlite.py:2) - stdlib
+# - os       (sqlite.py:3) - stdlib
+# - glob     (sqlite.py:4) - stdlib
+#
+# === scrape_marches.py (scrape_marches.py:18-27) ===
+# Stdlib: argparse, csv, os, re, sys, time, datetime
+# External (pip install required):
+requests==2.32.3
+beautifulsoup4==4.12.3
+
+# Transitive dependencies (installed automatically with above):
+# certifi==2024.8.30
+# charset-normalizer==3.4.0
+# idna==2.10
+# urllib3==2.2.3
+# soupsieve==2.6
