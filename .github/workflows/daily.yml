@@ -1,0 +1,56 @@
+name: Daily Scrape
+
+on:
+  schedule:
+    # Runs every day at 00:00 AM UTC (GitHub Actions cron is always UTC)
+    # Use '0 0 * * *' for 00:00 UTC, '0 1 * * *' for 00:00 WEST/CET (Morocco) -> 01:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # allows manual run from Actions tab
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run auto_run.sh
+        run: |
+          chmod +x auto_run.sh
+          bash ./auto_run.sh
+
+      - name: Commit and push updated DB (if changed)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scrape_data.db || true
+          # also add any csv that might remain if sqlite.py failed
+          git add *.csv || true
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: daily scrape $(date -u +'%Y-%m-%d')"
+            git push
+          fi
+
+      - name: Upload artifacts (CSV/DB)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scrape-results-${{ github.run_number }}
+          path: |
+            *.csv
+            *.db
+          if-no-files-found: warn
