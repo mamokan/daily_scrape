@@ -4,8 +4,7 @@ on:
   schedule:
     # Runs every day at 00:00 AM UTC (GitHub Actions cron is always UTC)
     # Use '0 0 * * *' for 00:00 UTC, '0 1 * * *' for 00:00 WEST/CET (Morocco) -> 01:00 UTC
-    - cron: '58 23 * * *'
-  workflow_dispatch: # allows manual run from Actions tab
+    - cron: '58 22 * * *'
 
 jobs:
   scrape:
