@@ -33,16 +33,31 @@ jobs:
 
       - name: Commit and push updated DB (if changed)
         run: |
+          # 1. Configure Git
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add scrape_data.db || true
-          # also add any csv that might remain if sqlite.py failed
-          git add *.csv || true
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # 2. Add files safely (ignoring "pathspec did not match" errors)
+          git add scrape_data.db 2>/dev/null || true
+          git add *.csv 2>/dev/null || true
+          
+          # 3. Check if anything actually changed
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
+            # 4. Handle remote updates gracefully using Git stash
+            echo "Changes detected. Syncing with remote repository..."
+            git stash --include-untracked
+            git pull --rebase origin main
+            git stash pop || echo "No stash to pop or minor conflict resolved"
+            
+            # 5. Re-stage files after the pull/rebase
+            git add scrape_data.db 2>/dev/null || true
+            git add *.csv 2>/dev/null || true
+            
+            # 6. Commit and Push
             git commit -m "chore: daily scrape $(date -u +'%Y-%m-%d')"
-            git push
+            git push origin main
           fi
 
       - name: Upload artifacts (CSV/DB)
