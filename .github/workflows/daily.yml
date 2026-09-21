@@ -5,6 +5,8 @@ on:
     # Runs every day at 00:00 AM UTC (GitHub Actions cron is always UTC)
     # Use '0 0 * * *' for 00:00 UTC, '0 1 * * *' for 00:00 WEST/CET (Morocco) -> 01:00 UTC
     - cron: '58 21 * * *'
+  workflow_dispatch: # Added this so you can also manually test-run the pipeline with a button
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -32,8 +34,8 @@ jobs:
       - name: Commit and push updated DB (if changed)
         run: |
           # 1. Configure Git
-          git config user.name ${{vars.VARIABLE_NAME}}
-          git config user.email ${{vars.VARIABLE_EMAIL}}
+          git config user.name "${{ vars.VARIABLE_NAME }}"
+          git config user.email "${{ vars.VARIABLE_EMAIL }}"
           
           # 2. Add files safely (ignoring "pathspec did not match" errors)
           git add scrape_data.db 2>/dev/null || true
@@ -67,3 +69,15 @@ jobs:
             *.csv
             *.db
           if-no-files-found: warn
+
+  rerun-on-failure:
+    runs-on: ubuntu-latest
+    if: failure() # Only runs if a previous pipeline job fails
+    needs: [scrape] # Fixed: Pointed to the actual job ID 'scrape'
+    permissions:
+      actions: write # Required permission to trigger a rerun
+    steps:
+      - name: Automatically rerun failed jobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run rerun ${{ github.run_id }} --failed
