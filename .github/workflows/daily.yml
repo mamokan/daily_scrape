@@ -4,7 +4,7 @@ on:
   schedule:
     # Runs every day at 00:00 AM UTC (GitHub Actions cron is always UTC)
     # Use '0 0 * * *' for 00:00 UTC, '0 1 * * *' for 00:00 WEST/CET (Morocco) -> 01:00 UTC
-    - cron: '58 21 * * *'
+    - cron: '00 21 * * *'
   workflow_dispatch: # Added this so you can also manually test-run the pipeline with a button
 
 jobs:
